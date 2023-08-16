@@ -159,7 +159,7 @@ def haymarket_and_leith
   # Give the company and num of the services that connect stops
   # 115 and 137 ('Haymarket' and 'Leith')
   execute(<<-SQL)
-    SELECT  DISTINCT a.company, a.num
+    SELECT DISTINCT a.company, a.num
     FROM routes AS a
     JOIN routes AS b
     ON b.company = a.company
@@ -177,6 +177,16 @@ def craiglockhart_and_tollcross
   # Give the company and num of the services that connect stops
   # 'Craiglockhart' and 'Tollcross'
   execute(<<-SQL)
+  SELECT a.company, a.num
+  FROM routes a
+  JOIN routes b
+  ON a.company = b.company AND a.num = b.num
+  JOIN stops stopsa
+  ON stopsa.id = a.stop_id
+  JOIN stops stopsb
+  ON stopsb.id = b.stop_id
+  WHERE stopsa.name = 'Craiglockhart' 
+  AND stopsb.name = 'Tollcross';
   SQL
 end
 
@@ -185,6 +195,15 @@ def start_at_craiglockhart
   # by taking one bus, including 'Craiglockhart' itself. Include the stop name,
   # as well as the company and bus no. of the relevant service.
   execute(<<-SQL)
+  SELECT DISTINCT stopsb.name, a.company, a.num
+  FROM routes a
+  JOIN routes b
+  ON a.company = b.company AND a.num = b.num
+  JOIN stops stopsa
+  ON stopsa.id = a.stop_id
+  JOIN stops stopsb
+  ON stopsb.id = b.stop_id
+  WHERE stopsa.name = 'Craiglockhart';  
   SQL
 end
 
@@ -193,5 +212,37 @@ def craiglockhart_to_sighthill
   # Sighthill. Show the bus no. and company for the first bus, the name of the
   # stop for the transfer, and the bus no. and company for the second bus.
   execute(<<-SQL)
+  SELECT DISTINCT a.num, a.company, stopsb.name, c.num, c.company
+  FROM routes a
+  JOIN routes b
+  ON a.company = b.company AND a.num = b.num
+  JOIN stops stopsa
+  ON stopsa.id = a.stop_id
+  JOIN stops stopsb
+  ON stopsb.id = b.stop_id
+  JOIN stops stopsc
+  ON stopsb.id = stopsc.id
+  JOIN routes c
+  ON c.stop_id = stopsc.id
+  JOIN routes d
+  ON c.company = d.company AND c.num = d.num
+  JOIN stops stopsd
+  ON stopsd.id = d.stop_id
+  WHERE stopsd.name = 'Sighthill'
+  AND stopsa.name = 'Craiglockhart';
+
   SQL
 end
+
+
+  # routes c
+  # ON c
+  #   JOIN routes d
+  #   ON c.company = d.company AND c.num = d.num
+  #   JOIN stops stopsc
+  #   ON stopsc.id = c.stop_id
+  #   JOIN stops stopsd
+  #   ON stopsd.id = d.stop_id
+  #   WHERE stopsd.name = 'Sighthill'
+  # ON stopsb.id = stopsd.id
+  # WHERE stopsa.name = 'Craiglockhart';
